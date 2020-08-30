@@ -23,4 +23,4 @@ urlautofire made to make your life easier, this tool allow you to browse a file 
 * [python3](https://www.python.org/downloads/) 
 
 ## demo 
- video: https://www.youtube.com/embed/ph1abRpTFoY
+[![Demo video](https://img.youtube.com/vi/ph1abRpTFoY/0.jpg)](https://www.youtube.com/watch?v=ph1abRpTFoY)
