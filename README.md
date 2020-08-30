@@ -13,3 +13,9 @@ urlautofire made to make your life easier, this tool allow you to browse a file 
 ![main window](./imgt/shortcut.png)
 
 **you might be do another method to set the shortcut it depends on your linux os**
+
+## requirement 
+
+* [PyQt5](https://pypi.org/project/PyQt5/) : 
+   * `pip3 install PyQt5`
+* [python3](https://www.python.org/downloads/) 
