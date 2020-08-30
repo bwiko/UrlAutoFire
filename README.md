@@ -11,7 +11,7 @@ urlautofire made to make your life easier, this tool allow you to browse a file 
 1. then add `UATShortcut -p` and your shortcut to represent the previous action
 
 
-![main window](./imgt/shortcut.png)
+![keyboardshortcut](./imgt/shortcut.png)
 
 **you might be do another method to set the shortcut it depends on your linux os**.
 
