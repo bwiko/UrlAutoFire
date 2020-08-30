@@ -13,16 +13,16 @@ class session_managment :
 	def create_session_file(self) : 
 		string_bol = os.popen('if [ -e '+self.path+' ]; then  echo ture ;else  echo  false;  fi;').read()
 		if string_bol == 'false' : 
-			os.system('touch '+self.path+'/.session')
+			os.system('touch '+self.path+'/session')
 		else : 
 			print("the file is here ")
 	def read_session_file(self): 
-		output = os.popen("cat "+self.path+"/.session | grep -E '"+self.current_file+":'")
+		output = os.popen("cat "+self.path+"/session | grep -E '"+self.current_file+":'")
 		return output.read() 
 	def save_session(self,paramter):
-		os.system("grep -vE '"+self.current_file+":' "+self.path+"/.session >"+self.path+"/.tempsession")
+		os.system("grep -vE '"+self.current_file+":' "+self.path+"/session >"+self.path+"/.tempsession")
 		os.system('echo '+paramter+' >> '+self.path+'/.tempsession')
-		os.system('mv '+self.path+'/.tempsession '+self.path+'/.session')
+		os.system('mv '+self.path+'/.tempsession '+self.path+'/session')
 
 
 class Main(QtWidgets.QMainWindow,Ui_Urlfire) :
