@@ -31,9 +31,8 @@ class Main(QtWidgets.QMainWindow,Ui_Urlfire) :
 	session_path = 'session/' #this is the path of the session folder 
 	file_name='' #this is the path of the current file 
 	next_click , prev_click = False,False #for prevent the tool from exec same url twice 
-	command_list = {"test":"echo ':URL:'",
-	"Chromium":"chromium --password-store=basic ':URL:'",
-	"Falkon":"falkon ':URL:'",
+	command_list = {
+	"Chromium":"chromium ':URL:'",
 	"Firefox":"firefox ':URL:'",
 	"Google_chrome":"google-chrome ':URL:'"
 	
