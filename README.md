@@ -22,3 +22,5 @@ urlautofire made to make your life easier, this tool allow you to browse a file 
    * `pip3 install PyQt5`
 * [python3](https://www.python.org/downloads/) 
 
+## demo 
+ video: https://www.youtube.com/embed/ph1abRpTFoY
