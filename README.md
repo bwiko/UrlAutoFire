@@ -41,8 +41,11 @@ urlautofire made to make your life easier, this tool allow you to browse a file 
 
 ## Advanced configuration
 
-* If you want to add a new browser or custom command just add it to `command_list` LIST with the flowing syntax `,"command name":"command ':URL:'" the` `:URL:` represent current url 
+* If you want to add a new browser or custom command just add it to `command_list` LIST with the following syntax `,"command name":"command ':URL:'" the` `:URL:` represent current url 
 ![commandlist](./imgt/commandlist.png)
 
 * If you want to specify a specific session path , then change the value of `session_path` 
 ![sessionpath](./imgt/session.png)
+
+* If you want to change the Lport just change the value of `L_port` and change the port in `shortcut.py` to new `L_port` (`1111 to new l_port`) 
+![L_PORT](./img/L_port.png)
