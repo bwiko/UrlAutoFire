@@ -64,11 +64,13 @@ class Main(QtWidgets.QMainWindow,Ui_Urlfire) :
 	def closeEvent(self,e): #i add this event because whene you close the window the listener not closing since is just a thread 
 		while self.P_listen.is_alive() : 
 			with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as con:
+				try : 
+					con.connect(("localhost",1111))
+					con.sendall(b'exit')
 				
-				con.connect(("localhost",1111))
-				con.sendall(b'exit')
-				
-				con.close() 	
+					con.close()
+				except : 
+					pass 
 		if self.therisFile :
 			if self.c_e_u == self.listWidget.count():
 				self.c_e_u -=1
