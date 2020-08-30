@@ -13,7 +13,8 @@ urlautofire made to make your life easier, this tool allow you to browse a file 
 
 ![main window](./imgt/shortcut.png)
 
-**you might be do another method to set the shortcut it depends on your linux os**
+**you might be do another method to set the shortcut it depends on your linux os**.
+
 **note :** the shortcut work only when you active the listener
 ## requirement 
 
