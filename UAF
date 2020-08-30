@@ -41,6 +41,8 @@ class Main(QtWidgets.QMainWindow,Ui_Urlfire) :
 	breack_point = [] #the list of breack points 
 	Stop_listener= True  # i don't know way i put this here 
 	therisFile= False # this value i add it to avoid save session to empty file 
+	L_port = 1111 #this is the listener port if you want to change it 
+
 	def __init__(self,parent=None):
 			QtWidgets.QWidget.__init__(self,parent=parent)
 			self.setupUi(self)
@@ -65,7 +67,7 @@ class Main(QtWidgets.QMainWindow,Ui_Urlfire) :
 		while self.P_listen.is_alive() : 
 			with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as con:
 				try : 
-					con.connect(("localhost",1111))
+					con.connect(("localhost",self.L_port))
 					con.sendall(b'exit')
 				
 					con.close()
@@ -100,7 +102,7 @@ class Main(QtWidgets.QMainWindow,Ui_Urlfire) :
 				try :
 					with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as con:
 						
-						con.connect(("localhost",1111))
+						con.connect(("localhost",self.L_port))
 						con.sendall(b'exit')
 						
 						con.close() 
@@ -343,7 +345,7 @@ class Main(QtWidgets.QMainWindow,Ui_Urlfire) :
 	def getdata(self) : 
 
 		HOST = 'localhost'		
-		PORT = 1111			  
+		PORT = self.L_port			  
 		
 		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 			s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
