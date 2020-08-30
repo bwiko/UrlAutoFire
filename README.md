@@ -21,6 +21,8 @@ urlautofire made to make your life easier, this tool allow you to browse a file 
 * [PyQt5](https://pypi.org/project/PyQt5/) : 
    * `pip3 install PyQt5`
 * [python3](https://www.python.org/downloads/) 
+## Usage 
+
 
 ## demo 
 [![Demo video](https://img.youtube.com/vi/ph1abRpTFoY/0.jpg)](https://www.youtube.com/watch?v=ph1abRpTFoY)
