@@ -1,0 +1,418 @@
+#!/usr/bin/env python3
+from lib.guimain import Ui_Urlfire 
+from PyQt5 import QtCore, QtGui, QtWidgets
+import os
+import threading 
+import socket 
+
+
+class session_managment : 
+	def set_values(self,path,current_file,) : 
+		self.path = path 
+		self.current_file = current_file 
+	def create_session_file(self) : 
+		string_bol = os.popen('if [ -e '+self.path+' ]; then  echo ture ;else  echo  false;  fi;').read()
+		if string_bol == 'false' : 
+			os.system('touch '+self.path+'/.session')
+		else : 
+			print("the file is here ")
+	def read_session_file(self): 
+		output = os.popen("cat "+self.path+"/.session | grep -E '"+self.current_file+":'")
+		return output.read() 
+	def save_session(self,paramter):
+		os.system("grep -vE '"+self.current_file+":' "+self.path+"/.session >"+self.path+"/.tempsession")
+		os.system('echo '+paramter+' >> '+self.path+'/.tempsession')
+		os.system('mv '+self.path+'/.tempsession '+self.path+'/.session')
+
+
+class Main(QtWidgets.QMainWindow,Ui_Urlfire) :
+	Session_managment = session_managment() 
+	list_b='' #this val is to save the list of breack point in session files
+	session_path = 'session/' #this is the path of the session folder 
+	file_name='' #this is the path of the current file 
+	next_click , prev_click = False,False #for prevent the tool from exec same url twice 
+	command_list = {"test":"echo ':URL:'",
+	"Chromium":"chromium --password-store=basic ':URL:'",
+	"Falkon":"falkon ':URL:'",
+	"Firefox":"firefox ':URL:'",
+	"Google_chrome":"google-chrome ':URL:'"
+	
+	}  #this list of command you can add whatever you want to this list just remember that the :URL: will replaced by the url or line of this tools syntax >> comand_name:command
+	c_e_u=0 #this is the current line or url which was executed
+	breack_point = [] #the list of breack points 
+	Stop_listener= True  # i don't know way i put this here 
+	therisFile= False # this value i add it to avoid save session to empty file 
+	def __init__(self,parent=None):
+			QtWidgets.QWidget.__init__(self,parent=parent)
+			self.setupUi(self)
+			#self.toolButton_3.clicked.connect(self.just_test)
+			for comand in self.command_list : 
+				
+				self.comboBox.addItem(comand)
+			#----------------eventes ------------------
+			self.Play.clicked.connect(self.exec_selected)
+			self.actionopen.triggered.connect(self.get_file)
+			#self.Selecter.textChanged.connect(self.select_by)
+			self.Filter.textChanged.connect(self.int_url_regex)
+			self.Into.clicked.connect(self.exec_one_step)
+			self.Redo.clicked.connect(self.exec_back_step)
+			self.Breack.clicked.connect(self.set_breack_point)
+			self.Listener.clicked.connect(self.active_listener)
+
+			#--------------------start_listener----------
+			self.P_listen = threading.Thread(target=self.getdata)
+			
+	def closeEvent(self,e): #i add this event because whene you close the window the listener not closing since is just a thread 
+		while self.P_listen.is_alive() : 
+			with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as con:
+				
+				con.connect(("localhost",1111))
+				con.sendall(b'exit')
+				
+				con.close() 	
+		if self.therisFile :
+			if self.c_e_u == self.listWidget.count():
+				self.c_e_u -=1
+			elif self.c_e_u == -1 : 
+				self.c_e_u=0 #self.c_e_u +=1
+			self.list_b = ""
+			
+			for brp in self.breack_point: 
+					self.list_b+=str(self.listWidget.row(brp))+','
+			self.save_session()
+	def active_listener(self): 
+		if self.Stop_listener : 
+			
+			icon1 = QtGui.QIcon()
+			icon1.addPixmap(QtGui.QPixmap(":/icon/online.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+			self.Listener.setIcon(icon1)
+			self.Stop_listener=False
+			if  not self.P_listen.is_alive() : 
+				self.P_listen.start()
+				print("startins ... ")
+		else : 
+			icon1 = QtGui.QIcon()
+			icon1.addPixmap(QtGui.QPixmap(":/icon/offline.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+			self.Listener.setIcon(icon1)
+			self.Stop_listener=True
+			while self.P_listen.is_alive() : 
+				try :
+					with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as con:
+						
+						con.connect(("localhost",1111))
+						con.sendall(b'exit')
+						
+						con.close() 
+				except : 
+					pass 
+			self.P_listen = threading.Thread(target=self.getdata)
+	def set_breack_point(self): 
+		selected_item = self.listWidget.selectedItems() 
+		
+		
+		if selected_item != [] : 
+			for Item in selected_item  : 
+				Item.setSelected(False)
+				if Item in self.breack_point : 
+					self.breack_point.remove(Item)
+					row = self.listWidget.row(Item)
+					Pitem=self.listWidget.item(row)
+					url = Pitem.text()
+					self.listWidget.takeItem(row)
+					
+					
+					Pitem = QtWidgets.QListWidgetItem()
+					Pitem.setText(url)
+					self.listWidget.insertItem(row,Pitem)
+				else : 	
+					
+					icon6 = QtGui.QIcon()
+					icon6.addPixmap(QtGui.QPixmap(":/icon/media-playback-pause-symbolic.symbolic.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+					Item.setIcon(icon6)
+					self.breack_point.append(Item)
+				
+	def sbp_list(self,bplist): 
+		selected_item = [] 
+		
+		for i in bplist : 
+
+			selected_item.append(self.listWidget.item(int(i)))
+
+		if selected_item != [] : 
+			for Item in selected_item  : 
+				
+				Item.setSelected(False)
+				if Item in self.breack_point : 
+					self.breack_point.remove(Item)
+					row = self.listWidget.row(Item)
+					Pitem=self.listWidget.item(row)
+					url = Pitem.text()
+					self.listWidget.takeItem(row)
+					
+					
+					Pitem = QtWidgets.QListWidgetItem()
+					Pitem.setText(url)
+					self.listWidget.insertItem(row,Pitem)
+				else : 	
+					
+					icon6 = QtGui.QIcon()
+					icon6.addPixmap(QtGui.QPixmap(":/icon/media-playback-pause-symbolic.symbolic.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+					Item.setIcon(icon6)
+					self.breack_point.append(Item)
+	
+	def current_step(self,step): 
+		
+		item=self.listWidget.item(step)
+		icon5 = QtGui.QIcon()
+		icon5.addPixmap(QtGui.QPixmap(":/icon/corrent.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+		item.setIcon(icon5)
+		# 		
+		# QAbstractItemView.EnsureVisible	0	Scroll to ensure that the item is visible.
+		# QAbstractItemView.PositionAtTop	1	Scroll to position the item at the top of the viewport.
+		# QAbstractItemView.PositionAtBottom	2	Scroll to position the item at the bottom of the viewport.
+		# QAbstractItemView.PositionAtCenter	3	Scroll to position the item at the center of the viewport.
+
+		self.listWidget.scrollToItem(item,QtWidgets.QAbstractItemView.PositionAtCenter)
+		self.c_e_u=step
+	
+	def exec_one_step(self) : 
+		
+		if self.therisFile : 
+			if self.prev_click : 
+				self.c_e_u += 1 
+				self.prev_click = False 
+			len_listw =self.listWidget.count()
+			if self.c_e_u != 0  and self.c_e_u < len_listw:
+				Pitem=self.listWidget.item(self.c_e_u-1)
+				if Pitem not in self.breack_point : 
+					url = Pitem.text()
+					self.listWidget.takeItem(self.c_e_u-1)
+					
+					
+					Pitem = QtWidgets.QListWidgetItem()
+					Pitem.setText(url)
+					self.listWidget.insertItem(self.c_e_u-1,Pitem)
+				
+
+				item=self.listWidget.item(self.c_e_u)
+				
+				#-----------------exec command ----------------------------------------
+				command = self.command_list[self.comboBox.currentText()].replace(":URL:",item.text())
+				
+
+				os.system(command+" &>/dev/null")
+				#----------------------------------------------------------------------
+				
+				icon5 = QtGui.QIcon()
+				icon5.addPixmap(QtGui.QPixmap(":/icon/corrent.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+				item.setIcon(icon5)
+				if item in self.breack_point : 
+					self.breack_point.remove(item)
+				self.listWidget.scrollToItem(item,QtWidgets.QAbstractItemView.EnsureVisible)
+			elif self.c_e_u == 0 : 
+				
+				item=self.listWidget.item(self.c_e_u)
+				
+				#-----------------exec command ----------------------------------------
+				command = self.command_list[self.comboBox.currentText()].replace(":URL:",item.text())
+				
+
+				os.system(command+" &>/dev/null")
+				#----------------------------------------------------------------------
+				
+				icon5 = QtGui.QIcon()
+				icon5.addPixmap(QtGui.QPixmap(":/icon/corrent.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+				item.setIcon(icon5)
+				item.setIcon(icon5)
+			elif self.c_e_u == len_listw : 
+				try : 
+					QtWidgets.QMessageBox.about(self, "Tip", "Where you're going bro , the list has been finished !!")
+				except : 
+					pass 
+			if self.c_e_u < len_listw:
+				self.c_e_u +=1
+				self.next_click = True 
+			
+	def exec_back_step(self) : 
+		if self.therisFile : 
+			if self.next_click : 
+				self.c_e_u -=1 
+				self.next_click = False 
+			if self.c_e_u > 0  :
+				Pitem=self.listWidget.item(self.c_e_u)
+				if Pitem not in self.breack_point : 
+					url = Pitem.text()
+					self.listWidget.takeItem(self.c_e_u)
+					
+					
+					Pitem = QtWidgets.QListWidgetItem()
+					Pitem.setText(url)
+					self.listWidget.insertItem(self.c_e_u,Pitem)
+				
+				item=self.listWidget.item(self.c_e_u-1)
+				#-----------------exec command ---------------
+				command = self.command_list[self.comboBox.currentText()].replace(":URL:",item.text())
+				
+				os.system(command+" &>/dev/null")
+				#----------------------------------------------
+				icon5 = QtGui.QIcon()
+				icon5.addPixmap(QtGui.QPixmap(":/icon/corrent.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+				item.setIcon(icon5)
+				if item in self.breack_point : 
+					self.breack_point.remove(item)
+				self.listWidget.scrollToItem(item,QtWidgets.QAbstractItemView.EnsureVisible)
+				self.c_e_u -=1
+			elif self.c_e_u == 0 : 
+				
+				item=self.listWidget.item(self.c_e_u)
+				
+				#-----------------exec command ----------------------------------------
+				command = self.command_list[self.comboBox.currentText()].replace(":URL:",item.text())
+				
+
+				os.system(command+" &>/dev/null")
+				#----------------------------------------------------------------------
+				
+				icon5 = QtGui.QIcon()
+				icon5.addPixmap(QtGui.QPixmap(":/icon/corrent.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+				self.c_e_u -=1
+			elif self.c_e_u == -1 : 
+				try : 
+					QtWidgets.QMessageBox.about(self, "Tip", "Where you're going bro , You are already executed this !!")
+				except : 
+					pass 
+			self.prev_click = True 
+	def exec_selected(self): 
+		if self.therisFile : 
+			list_item = self.listWidget.selectedItems()
+			
+			if self.next_click : 
+				self.c_e_u -=1 
+				self.next_click = False 
+			if self.c_e_u != -1 and list_item != [] : 
+				Pitem=self.listWidget.item(self.c_e_u)
+				url = Pitem.text()
+				
+				self.listWidget.takeItem(self.c_e_u)
+				
+				
+				Pitem = QtWidgets.QListWidgetItem()
+				Pitem.setText(url)
+				self.listWidget.insertItem(self.c_e_u,Pitem)
+			 
+			for url in list_item : 
+				url.setSelected(False)
+				last_url = url
+				if url in self.breack_point : 
+					
+					command = self.command_list[self.comboBox.currentText()].replace(":URL:",url.text())
+					os.system(command+" &>/dev/null")	
+					self.breack_point.remove(url)
+					
+					break 
+				command = self.command_list[self.comboBox.currentText()].replace(":URL:",url.text())
+
+				os.system(command+" &>/dev/null")
+			icon5 = QtGui.QIcon()
+			icon5.addPixmap(QtGui.QPixmap(":/icon/corrent.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+			last_url.setIcon(icon5)
+			self.c_e_u = self.listWidget.row(last_url)
+		
+	def int_url_regex(self): 
+		if self.file_name != '' :
+			self.listWidget.clear()
+			self.breack_point.clear()
+			self.c_e_u = 0 
+			url_list = os.popen("cat '"+self.file_name+"' | grep -E '"+self.Filter.text()+"' 2>/dev/null").read()
+			
+			for url in url_list.split() : 
+				item = QtWidgets.QListWidgetItem()
+				item.setText(url)
+				self.listWidget.addItem(item)
+			
+	def int_url_list(self,f_path):
+		self.listWidget.clear()
+		url_list = os.popen("cat '"+f_path+"'").read()
+		
+		for url in url_list.split() : 
+			item = QtWidgets.QListWidgetItem()
+			item.setText(url)
+			self.listWidget.addItem(item)
+		
+	def getdata(self) : 
+
+		HOST = 'localhost'		
+		PORT = 1111			  
+		
+		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+			s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+			s.bind((HOST, PORT))
+			
+			while True :
+				s.listen(1)
+				conn, addr = s.accept()
+				with conn:
+						
+					data = conn.recv(1024)
+					
+					if  data == b'next' : 
+						self.exec_one_step()
+					elif data == b'prev' : 
+						self.exec_back_step() 
+					elif data == b'exit' : 
+						
+						
+						break 
+					
+			print("Close listener !!")
+			s.close()
+
+	def get_file(self): 
+		if self.therisFile :
+			if self.c_e_u == self.listWidget.count():
+				self.c_e_u -=1
+			elif self.c_e_u == -1 : 
+				self.c_e_u=0 #self.c_e_u +=1
+			self.list_b = ""
+			
+			for brp in self.breack_point: 
+					self.list_b+=str(self.listWidget.row(brp))+','
+			self.save_session()
+		self.file_name= QtWidgets.QFileDialog.getOpenFileName(self, 'Single File',".",'*.txt')[0]
+		
+		
+		if self.file_name != '' : 
+			
+			self.Session_managment.set_values(self.session_path,self.file_name)
+			get_session = self.Session_managment.read_session_file()
+			self.int_url_list(self.file_name)
+			if get_session == '' : 
+				self.Session_managment.save_session(self.file_name+"::::")
+				
+			else : 
+				session_list = get_session.split(":")[1:]
+				if session_list[0] != '' : 
+					self.Filter.setText(session_list[0])
+					self.int_url_regex()
+			
+				if session_list[1] != '': 
+					self.current_step(int(session_list[1]))
+				if session_list[2] != '' : 
+					brackpoint_list = session_list[2].split(",")
+					brackpoint_list = brackpoint_list[:-1]
+					self.sbp_list(brackpoint_list)
+			self.therisFile = True 
+	def save_session(self) : 
+		
+		session_string = self.file_name+":"+self.Filter.text()+":"+str(self.c_e_u)+":"+self.list_b
+		
+		self.Session_managment.save_session(session_string)
+if __name__ == "__main__":
+	import sys
+	app = QtWidgets.QApplication(sys.argv)
+	MainWindow = Main()
+	
+	
+	MainWindow.show()
+	sys.exit(app.exec_())
+	
