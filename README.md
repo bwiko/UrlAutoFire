@@ -22,13 +22,27 @@ urlautofire made to make your life easier, this tool allow you to browse a file 
    * `pip3 install PyQt5`
 * [python3](https://www.python.org/downloads/) 
 ## Usage 
-* **previous button :** to open the previous url (`Crtl+D`)
-* **next button :** to open the next url (`Crtl+S`)
-* **play button :** open selected urls (`Crtl+P`)  
-* **breackpoint button :** to set a list of break points (`Crtl+B`) ~~same to remove~~
-* **listener button :** to start or stop the listenr (listener used when you use the shortcut linux option ) (`Crtl+L`)
+* **previous button :** to open the previous url (`Ctrl+D`)
+* **next button :** to open the next url (`Ctrl+S`)
+* **play button :** open selected urls (`Ctrl+P`)  
+* **breackpoint button :** to set a list of break points (`Ctrl+B`) ~~same to remove~~
+* **listener button :** to start or stop the listenr (listener used when you use the shortcut linux option ) (`Ctrl+L`)
 * **list of browsers  :** to shouse which browser will open the urls 
 * **filter input :** you can use regex to output only specific urls 
+* **file>open :** open your urls_file (`Ctrl+O`)
 * **square button:** do nothing just for make the tool look beauty
-## demo 
+
+
+## Demo 
+
+### Video:
+
 [![Demo video](https://img.youtube.com/vi/ph1abRpTFoY/0.jpg)](https://www.youtube.com/watch?v=ph1abRpTFoY)
+
+## Advanced configuration
+
+* If you want to add a new browser or custom command just add it to `command_list` LIST with the flowing syntax `,"command name":"command ':URL:'" the` `:URL:` represent current url 
+![commandlist](./imgt/commandlist.png)
+
+* If you want to specify a specific session path , then change the value of `session_path` 
+![sessionpath](./imgt/session.png)
