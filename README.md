@@ -1,9 +1,16 @@
 # UrlAutoFire
 urlautofire made to make your life easier, this tool allow you to browse a file of urls faster just by adding shortcut to your machine(linux) or send `next` || `prev` to `localhost:1111` 😂😂
 
-## guide 
+## Features
+1. **Session management:** when you close the U_A_F or open new file the tool save all current statuts 
+1. **Background run :** using the linux shortcut you can make a simple socket connection to make the U_A_F work in background 
+1. **Shortcuts :** all button and action work with shortcut just for make your life easier 😂
 
-#### the gui is easy to use but to use the shortcut you must do small configuration to your machine  
+### NOTE : this version is beta if you have any problem feel free to inform us 
+
+## Guide 
+
+#### The gui is easy to use but to use the shortcut you must do small configuration to your machine  
 1. copy the `.lib/shortcut.py` to `/bin` (`cp /lib/shortcut.py /bin/UATShortcut`)
 1. make the file executable (`chmod +x UATShortcut`)
 1. go to your menu>settings>keyboard app shortcut (xfce Linux parrot)
@@ -16,7 +23,7 @@ urlautofire made to make your life easier, this tool allow you to browse a file 
 **you might be do another method to set the shortcut it depends on your linux os**.
 
 **note :** the shortcut work only when you active the listener
-## requirement 
+## Requirement 
 
 * [PyQt5](https://pypi.org/project/PyQt5/) : 
    * `pip3 install PyQt5`
